@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve/Reject API Buttons</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to override or enhance Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8; /* Light gray background */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2.5rem; /* Increased padding */
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+            text-align: center;
+            width: 90%; /* Responsive width */
+            max-width: 600px; /* Max width for larger screens */
+        }
+        button {
+            transition: all 0.2s ease-in-out; /* Smooth transitions for hover/focus */
+        }
+        button:hover {
+            transform: translateY(-2px); /* Slight lift on hover */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+        }
+        button:active {
+            transform: translateY(0); /* Press effect */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container flex flex-col items-center gap-6">
+        <h1 class="text-3xl font-bold text-gray-800">Action Required</h1>
+        <p class="text-lg text-gray-600">Please choose to Approve or Reject.</p>
+        <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+            <button id="approveButton"
+                    class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-75 text-xl">
+                Approve
+            </button>
+            <button id="rejectButton"
+                    class="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:from-red-600 hover:to-rose-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75 text-xl">
+                Reject
+            </button>
+        </div>
+        <div id="message" class="mt-4 text-lg font-medium">
+            <!-- Messages will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // Get references to the buttons and message display area
+        const approveButton = document.getElementById('approveButton');
+        const rejectButton = document.getElementById('rejectButton');
+        const messageDiv = document.getElementById('message');
+
+        // Define the API endpoint (replace with your actual instance if known)
+        // IMPORTANT: In a real scenario, you would replace `{{INSTANCE}}` with the actual domain.
+        const API_URL = 'https://{{INSTANCE}}/api/datastream/3204/fetch/';
+
+        /**
+         * Function to make the API call.
+         * @param {string} action - The action to perform (e.g., 'Approve', 'Reject').
+         * Uses async/await for cleaner asynchronous code.
+         */
+        async function performAction(action) {
+            // Display loading message
+            messageDiv.className = `mt-4 text-lg font-medium text-blue-600`;
+            messageDiv.textContent = `Processing ${action}...`;
+            approveButton.disabled = true; // Disable both buttons during fetch
+            rejectButton.disabled = true;
+
+            try {
+                // For demonstration, we'll send the action as a query parameter or in the body.
+                // You might adjust this based on your API's expected structure (e.g., POST with JSON body).
+                const url = `${API_URL}?action=${action.toLowerCase()}`;
+                const response = await fetch(url, {
+                    method: 'GET', // Using GET for simplicity, consider POST for actual actions
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add any other necessary headers, e.g., Authorization tokens
+                        // 'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                    }
+                    // If using POST, uncomment and modify the body:
+                    // body: JSON.stringify({ status: action.toLowerCase(), data_id: 'some_id_here' })
+                });
+
+                // Check if the request was successful (status code 2xx)
+                if (response.ok) {
+                    const data = await response.json(); // Or .text() if response is not JSON
+                    messageDiv.className = 'mt-4 text-lg font-medium text-green-600';
+                    messageDiv.textContent = `${action} successful! Check console for details.`;
+                    console.log(`API Response for ${action}:`, data); // Log the response data
+                } else {
+                    // Handle HTTP errors (e.g., 404, 500)
+                    const errorText = await response.text(); // Get error message from response
+                    messageDiv.className = 'mt-4 text-lg font-medium text-red-600';
+                    messageDiv.textContent = `Error ${action}: ${response.status} - ${response.statusText}. Details: ${errorText}`;
+                    console.error(`API Error for ${action}:`, response.status, response.statusText, errorText);
+                }
+            } catch (error) {
+                // Handle network errors or other exceptions
+                messageDiv.className = 'mt-4 text-lg font-medium text-red-600';
+                messageDiv.textContent = `Network Error for ${action}: ${error.message}`;
+                console.error(`Fetch operation for ${action} failed:`, error);
+            } finally {
+                approveButton.disabled = false; // Re-enable both buttons
+                rejectButton.disabled = false;
+            }
+        }
+
+        // Add event listeners to the buttons
+        approveButton.addEventListener('click', () => performAction('Approve'));
+        rejectButton.addEventListener('click', () => performAction('Reject'));
+    </script>
+</body>
+</html>
