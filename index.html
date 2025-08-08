@@ -64,9 +64,9 @@
         const rejectButton = document.getElementById('rejectButton');
         const messageDiv = document.getElementById('message');
 
-        // Define the API endpoint (replace with your actual instance if known)
-        // IMPORTANT: In a real scenario, you would replace `{{INSTANCE}}` with the actual domain.
-        const API_URL = 'https://{{INSTANCE}}/api/datastream/3204/fetch/';
+        // Define the specific API endpoints for Approve and Reject actions
+        const APPROVE_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastream/3204/fetch/';
+        const REJECT_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9744/fetch/';
 
         /**
          * Function to make the API call.
@@ -74,6 +74,9 @@
          * Uses async/await for cleaner asynchronous code.
          */
         async function performAction(action) {
+            // Determine which URL to use based on the action
+            const API_URL = action === 'Approve' ? APPROVE_API_URL : REJECT_API_URL;
+
             // Display loading message
             messageDiv.className = `mt-4 text-lg font-medium text-blue-600`;
             messageDiv.textContent = `Processing ${action}...`;
@@ -83,7 +86,10 @@
             try {
                 // For demonstration, we'll send the action as a query parameter or in the body.
                 // You might adjust this based on your API's expected structure (e.g., POST with JSON body).
-                const url = `${API_URL}?action=${action.toLowerCase()}`;
+                // Note: The original API URL includes '/fetch/', and the new URLs also end with '/fetch/'.
+                // If your API expects parameters, you'd add them here.
+                const url = API_URL; // Using the chosen API_URL directly
+
                 const response = await fetch(url, {
                     method: 'GET', // Using GET for simplicity, consider POST for actual actions
                     headers: {
