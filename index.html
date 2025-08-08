@@ -68,6 +68,9 @@
         const APPROVE_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastream/3204/fetch/';
         const REJECT_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9744/fetch/';
 
+        // Define the Authorization Token based on the provided image
+        const AUTH_TOKEN = '928b5e5860c428f9b4875a30f4b0b5b702d959ba'; // Replace with your actual token if it changes
+
         /**
          * Function to make the API call.
          * @param {string} action - The action to perform (e.g., 'Approve', 'Reject').
@@ -84,20 +87,14 @@
             rejectButton.disabled = true;
 
             try {
-                // For demonstration, we'll send the action as a query parameter or in the body.
-                // You might adjust this based on your API's expected structure (e.g., POST with JSON body).
-                // Note: The original API URL includes '/fetch/', and the new URLs also end with '/fetch/'.
-                // If your API expects parameters, you'd add them here.
-                const url = API_URL; // Using the chosen API_URL directly
-
-                const response = await fetch(url, {
-                    method: 'GET', // Using GET for simplicity, consider POST for actual actions
+                const response = await fetch(API_URL, {
+                    method: 'GET', // Using GET as per the current API structure
                     headers: {
                         'Content-Type': 'application/json',
-                        // Add any other necessary headers, e.g., Authorization tokens
-                        // 'Authorization': 'Bearer YOUR_TOKEN_HERE'
+                        // Include the Authorization header with the Bearer Token
+                        'Authorization': `Token ${AUTH_TOKEN}`
                     }
-                    // If using POST, uncomment and modify the body:
+                    // For POST requests, you might include a body:
                     // body: JSON.stringify({ status: action.toLowerCase(), data_id: 'some_id_here' })
                 });
 
