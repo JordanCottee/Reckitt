@@ -65,11 +65,23 @@
         const messageDiv = document.getElementById('message');
 
         // Define the specific API endpoints for Approve and Reject actions
-        const APPROVE_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastream/3204/fetch/';
-        const REJECT_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9744/fetch/';
+        const APPROVE_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9743/fetch_fixed/';
+        const REJECT_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9744/fetch_fixed/';
 
-        // Define the Authorization Token based on the provided image
-        const AUTH_TOKEN = '928b5e5860c428f9b4875a30f4b0b5b702d959ba'; // Replace with your actual token if it changes
+        // Define the Authorization Token
+        const AUTH_TOKEN = '025bc41ae595696c8a1a07b02371cb820f818297'; 
+
+        /**
+         * Helper function to get today's date in YYYY-MM-DD format.
+         * @returns {string} Current date as a string (e.g., "2025-08-08").
+         */
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
         /**
          * Function to make the API call.
@@ -80,6 +92,13 @@
             // Determine which URL to use based on the action
             const API_URL = action === 'Approve' ? APPROVE_API_URL : REJECT_API_URL;
 
+            // Get today's date for the request body
+            const todayDate = getTodayDateString();
+            const requestBody = {
+                start: todayDate,
+                end: todayDate
+            };
+
             // Display loading message
             messageDiv.className = `mt-4 text-lg font-medium text-blue-600`;
             messageDiv.textContent = `Processing ${action}...`;
@@ -88,21 +107,20 @@
 
             try {
                 const response = await fetch(API_URL, {
-                    method: 'GET', // Using GET as per the current API structure
+                    method: 'POST', 
                     headers: {
                         'Content-Type': 'application/json',
-                        // Include the Authorization header with the Bearer Token
                         'Authorization': `Token ${AUTH_TOKEN}`
-                    }
-                    // For POST requests, you might include a body:
-                    // body: JSON.stringify({ status: action.toLowerCase(), data_id: 'some_id_here' })
+                    },
+                    // Send the dynamically generated JSON body
+                    body: JSON.stringify(requestBody)
                 });
 
                 // Check if the request was successful (status code 2xx)
                 if (response.ok) {
                     const data = await response.json(); // Or .text() if response is not JSON
                     messageDiv.className = 'mt-4 text-lg font-medium text-green-600';
-                    messageDiv.textContent = `${action} successful! Check console for details.`;
+                    messageDiv.textContent = `${action} successful!`; // Removed "Check console for details."
                     console.log(`API Response for ${action}:`, data); // Log the response data
                 } else {
                     // Handle HTTP errors (e.g., 404, 500)
