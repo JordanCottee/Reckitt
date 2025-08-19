@@ -3,146 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Approve/Reject API Buttons</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <title>Reference Number Email Sender</title>
+    <!-- Tailwind CSS CDN for easy styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles to override or enhance Tailwind */
+        /* Custom font for a modern look */
         body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f4f8; /* Light gray background */
+            font-family: "Inter", sans-serif;
         }
-        .container {
-            background-color: #ffffff;
-            padding: 2.5rem; /* Increased padding */
-            border-radius: 1.5rem; /* More rounded corners */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
+        /* Basic styling for the custom message box */
+        #messageBox {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
             text-align: center;
-            width: 90%; /* Responsive width */
-            max-width: 600px; /* Max width for larger screens */
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
         }
-        button {
-            transition: all 0.2s ease-in-out; /* Smooth transitions for hover/focus */
-        }
-        button:hover {
-            transform: translateY(-2px); /* Slight lift on hover */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
-        }
-        button:active {
-            transform: translateY(0); /* Press effect */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        #messageBox.error {
+            background-color: #f44336; /* Red for errors */
         }
     </style>
 </head>
-<body>
-    <div class="container flex flex-col items-center gap-6">
-        <h1 class="text-3xl font-bold text-gray-800">Action Required</h1>
-        <p class="text-lg text-gray-600">Please choose to Approve or Reject.</p>
-        <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
-            <button id="approveButton"
-                    class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-75 text-xl">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Enter Adverity Reference Number</h1>
+
+        <p class="text-gray-600 mb-8">This can be copied and pasted from the table above.</p>
+
+        <!-- Input Form -->
+        <div class="mb-6">
+            <label for="referenceNo" class="block text-gray-700 text-left text-sm font-medium mb-2">Reference Number:</label>
+            <input
+                type="text"
+                id="referenceNo"
+                placeholder="e.g., ABC-12345"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
+                aria-label="Reference Number Input"
+            >
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-4">
+            <button
+                id="approveBtn"
+                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md"
+            >
+                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Approve
             </button>
-            <button id="rejectButton"
-                    class="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold py-4 px-8 rounded-full shadow-lg hover:from-red-600 hover:to-rose-700 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-75 text-xl">
+            <button
+                id="rejectBtn"
+                class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md"
+            >
+                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Reject
             </button>
         </div>
-        <div id="message" class="mt-4 text-lg font-medium">
-            <!-- Messages will be displayed here -->
-        </div>
     </div>
 
+    <!-- Custom Message Box for notifications -->
+    <div id="messageBox"></div>
+
     <script>
-        // Get references to the buttons and message display area
-        const approveButton = document.getElementById('approveButton');
-        const rejectButton = document.getElementById('rejectButton');
-        const messageDiv = document.getElementById('message');
+        document.addEventListener('DOMContentLoaded', () => {
+            const referenceNoInput = document.getElementById('referenceNo');
+            const approveBtn = document.getElementById('approveBtn');
+            const rejectBtn = document.getElementById('rejectBtn');
+            const messageBox = document.getElementById('messageBox');
 
-        // Define the specific API endpoints for Approve and Reject actions
-        const APPROVE_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9743/fetch_fixed/';
-        const REJECT_API_URL = 'https://rb-hyho.datatap.adverity.com/api/datastreams/9744/fetch_fixed/';
+            // Define recipient email addresses for each action
+            const approveRecipient = 'd754f18c-88d7-40ae-97dc-bfbb5b62a752@datatap.adverity.com';
+            const rejectRecipient = '01c46440-09c1-4539-8fc2-dc8e36624d5d@datatap.adverity.com';
 
-        // Define the Authorization Token
-        const AUTH_TOKEN = '025bc41ae595696c8a1a07b02371cb820f818297'; 
+            /**
+             * Displays a custom message box with a given message and type (success/error).
+             * @param {string} message - The message to display.
+             * @param {string} type - 'success' or 'error'.
+             */
+            function showMessageBox(message, type) {
+                messageBox.textContent = message;
+                messageBox.className = ''; // Clear previous classes
+                messageBox.classList.add('px-6', 'py-3', 'rounded-lg', 'font-semibold', 'shadow-lg', 'text-white', 'z-1000'); // Add common classes
 
-        /**
-         * Helper function to get today's date in YYYY-MM-DD format.
-         * @returns {string} Current date as a string (e.g., "2025-08-08").
-         */
-        function getTodayDateString() {
-            const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-            const day = String(today.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        /**
-         * Function to make the API call.
-         * @param {string} action - The action to perform (e.g., 'Approve', 'Reject').
-         * Uses async/await for cleaner asynchronous code.
-         */
-        async function performAction(action) {
-            // Determine which URL to use based on the action
-            const API_URL = action === 'Approve' ? APPROVE_API_URL : REJECT_API_URL;
-
-            // Get today's date for the request body
-            const todayDate = getTodayDateString();
-            const requestBody = {
-                start: todayDate,
-                end: todayDate
-            };
-
-            // Display loading message
-            messageDiv.className = `mt-4 text-lg font-medium text-blue-600`;
-            messageDiv.textContent = `Processing ${action}...`;
-            approveButton.disabled = true; // Disable both buttons during fetch
-            rejectButton.disabled = true;
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST', 
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Token ${AUTH_TOKEN}`
-                    },
-                    // Send the dynamically generated JSON body
-                    body: JSON.stringify(requestBody)
-                });
-
-                // Check if the request was successful (status code 2xx)
-                if (response.ok) {
-                    const data = await response.json(); // Or .text() if response is not JSON
-                    messageDiv.className = 'mt-4 text-lg font-medium text-green-600';
-                    messageDiv.textContent = `${action} successful!`; // Removed "Check console for details."
-                    console.log(`API Response for ${action}:`, data); // Log the response data
+                if (type === 'error') {
+                    messageBox.classList.add('error', 'bg-red-600');
                 } else {
-                    // Handle HTTP errors (e.g., 404, 500)
-                    const errorText = await response.text(); // Get error message from response
-                    messageDiv.className = 'mt-4 text-lg font-medium text-red-600';
-                    messageDiv.textContent = `Error ${action}: ${response.status} - ${response.statusText}. Details: ${errorText}`;
-                    console.error(`API Error for ${action}:`, response.status, response.statusText, errorText);
+                    messageBox.classList.add('bg-green-600');
                 }
-            } catch (error) {
-                // Handle network errors or other exceptions
-                messageDiv.className = 'mt-4 text-lg font-medium text-red-600';
-                messageDiv.textContent = `Network Error for ${action}: ${error.message}`;
-                console.error(`Fetch operation for ${action} failed:`, error);
-            } finally {
-                approveButton.disabled = false; // Re-enable both buttons
-                rejectButton.disabled = false;
-            }
-        }
+                messageBox.style.display = 'block';
 
-        // Add event listeners to the buttons
-        approveButton.addEventListener('click', () => performAction('Approve'));
-        rejectButton.addEventListener('click', () => performAction('Reject'));
+                // Hide the message after 3 seconds
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 3000);
+            }
+
+            /**
+             * Handles sending the email based on the action (Approve/Reject).
+             * @param {string} actionType - 'Approve' or 'Reject'.
+             * @param {string} recipient - The email address of the recipient.
+             */
+            function sendEmail(actionType, recipient) {
+                const refNo = referenceNoInput.value.trim();
+
+                if (!refNo) {
+                    showMessageBox('Please enter a reference number.', 'error');
+                    return;
+                }
+
+                const csvHeaders = 'ReferenceNumber';
+                const csvData = `${refNo}`;
+                const csvContent = `${csvHeaders}\n${csvData}`;
+
+                const subject = encodeURIComponent(`${actionType} Reference Number: ${refNo}`);
+                const body = encodeURIComponent(
+                    `Action: ${actionType}\n\n` +
+                    `Reference Number below in CSV format:\n\n${csvContent}\n\n` +
+                    `You can copy the text above and paste it into a text file, then save it as a .csv file.`
+                );
+
+                const mailtoLink = `mailto:${recipient}?subject=${subject}&body=${body}`;
+
+                try {
+                    window.location.href = mailtoLink;
+                    showMessageBox(`Email client opened for ${actionType} action!`, 'success');
+                } catch (error) {
+                    showMessageBox('Could not open email client. Please ensure you have one configured.', 'error');
+                    console.error('Error opening mailto link:', error);
+                }
+            }
+
+            // Event listeners for the new buttons
+            approveBtn.addEventListener('click', () => {
+                sendEmail('Approve', approveRecipient);
+            });
+
+            rejectBtn.addEventListener('click', () => {
+                sendEmail('Reject', rejectRecipient);
+            });
+        });
     </script>
 </body>
 </html>
