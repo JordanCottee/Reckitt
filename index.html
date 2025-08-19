@@ -138,7 +138,15 @@
                 // Download the CSV file
                 downloadCsv(refNo);
                 
-                const body = encodeURIComponent(`Action: ${actionType}\n\n**PLEASE ATTACH THE FILE: Adverity_Ref_${refNo}.csv in your downloads folder**`);
+                // Create the email body with bolding using asterisks
+                const body = encodeURIComponent(
+                    `**PLEASE ATTACH THE FILE: Adverity_Ref_${refNo}.csv**\n` +
+                    `*THIS FILE CAN BE FOUND IN YOUR DOWNLOADS FOLDER.*\n\n` +
+                    `Action: ${actionType}\n\n` +
+                    `Reference Number below in CSV format:\n\n` +
+                    `ReferenceNumber\n` +
+                    `${refNo}`
+                );
 
                 const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(`${actionType} Reference Number: ${refNo}`)}&body=${body}`;
 
@@ -156,7 +164,6 @@
             approveBtn.addEventListener('click', () => {
                 sendEmail('Approve', approveRecipient);
             });
-        
             rejectBtn.addEventListener('click', () => {
                 sendEmail('Reject', rejectRecipient);
             });
