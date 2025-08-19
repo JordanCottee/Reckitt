@@ -1,172 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reference Number Email Sender & CSV Downloader</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom font for a modern look */
-        body {
-            font-family: "Inter", sans-serif;
-        }
-        /* Basic styling for the custom message box */
-        #messageBox {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #4CAF50; /* Green background */
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            text-align: center;
-            font-size: 1.125rem; /* text-lg */
-            font-weight: 600; /* font-semibold */
-        }
-        #messageBox.error {
-            background-color: #f44336; /* Red for errors */
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adverity CSV Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:invalid:not(:placeholder-shown) {
+            border-color: red;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+            color: #fff;
+            flex: 1 1 45%;
+        }
+
+        .btn.approve {
+            background-color: #4caf50;
+        }
+
+        .btn.approve:hover {
+            background-color: #45a049;
+        }
+
+        .btn.reject {
+            background-color: #f44336;
+        }
+
+        .btn.reject:hover {
+            background-color: #da3328;
+        }
+        
+        .note {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+<body>
+    <div class="container">
+        <h1>Approval Decision</h1>
+        <form id="refForm">
+            <label for="refNo">Enter Adverity Reference Number (Located in the above table):</label>
+            <input type="text" id="refNo" name="refNo"
+                   placeholder="e.g. 9ed820e9-ed7d-4003-b8d8-0b179b34b11f"
+                   pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+                   required>
+            <div class="button-group">
+                <button type="button" class="btn approve" onclick="handleAction('approve')">Approve</button>
+                <button type="button" class="btn reject" onclick="handleAction('reject')">Reject</button>
+            </div>
+            <div class="note hidden" id="instructionNote">
+                <p id="attachmentNote" class="attachment-note hidden">
+                NOTE: PLEASE ATTACH THE DOWNLOADED FILE: (<span id="fileName"></span>) TO THE EMAIL.
+            </p>
+            </div>
+        </form>
+    </div>
 
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Enter Adverity Reference Number</h1>
+    <script>
+        function handleAction(action) {
+            const refNoInput = document.getElementById('refNo');
+            const refNo = refNoInput.value;
+            const instructionNote = document.getElementById('instructionNote');
+            const fileNameSpan = document.getElementById('fileName');
 
-        <p class="text-gray-600 mb-8">This number can be copied and pasted from the table above.</p>
+            // Form validation
+            if (!refNoInput.checkValidity()) {
+                refNoInput.reportValidity();
+                return;
+            }
 
-        <div class="mb-6">
-            <label for="referenceNo" class="block text-gray-700 text-left text-sm font-medium mb-2">Reference Number:</label>
-            <input
-                type="text"
-                id="referenceNo"
-                placeholder="e.g. 9ed820e9-ed7d-4003-b8d8-0b179b34b11f"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
-                aria-label="Adverity File Reference Number Input"
-            >
-        </div>
+            const timestamp = new Date().toISOString();
+            const filename = `${refNo}.csv`;
+            const content = `Adverity Ref No.,Action,Timestamp\n"${refNo}","${action}","${timestamp}"`;
+            const emailTo = action === 'approve' ? 'd754f18c-88d7-40ae-97dc-bfbb5b62a752@datatap.adverity.com' : '01c46440-09c1-4539-8fc2-dc8e36624d5d@datatap.adverity.com';
 
-        <div class="flex flex-col space-y-4">
-            <button
-                id="approveBtn"
-                class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md"
-            >
-                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Approve
-            </button>
-            <button
-                id="rejectBtn"
-                class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md"
-            >
-                <svg class="inline-block w-5 h-5 mr-2 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                Reject
-            </button>
-        </div>
-    </div>
+            // Create and download the CSV file
+            const blob = new Blob([content], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
-    <div id="messageBox"></div>
+            // Construct the email body
+            const emailBody = `*** IMPORTANT: PLEASE ATTACH THE DOWNLOADED FILE: ${refNo}.csv TO THIS EMAIL ***\n
+This File can be located in your Downloads folder.\n
+\nAction: ${action}\nTimestamp: ${timestamp}`;
+            const emailSubject = `Adverity Ref: ${refNo}`;
+            
+            // Show attachment instructions
+            fileNameSpan.textContent = filename;
+            instructionNote.classList.remove('hidden');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const referenceNoInput = document.getElementById('referenceNo');
-            const approveBtn = document.getElementById('approveBtn');
-            const rejectBtn = document.getElementById('rejectBtn');
-            const messageBox = document.getElementById('messageBox');
-
-            // Define recipient email addresses for each action
-            const approveRecipient = 'd754f18c-88d7-40ae-97dc-bfbb5b62a752@datatap.adverity.com';
-            const rejectRecipient = '01c46440-09c1-4539-8fc2-dc8e36624d5d@datatap.adverity.com';
-
-            /**
-             * Displays a custom message box with a given message and type (success/error).
-             * @param {string} message - The message to display.
-             * @param {string} type - 'success' or 'error'.
-             */
-            function showMessageBox(message, type) {
-                messageBox.textContent = message;
-                messageBox.className = ''; // Clear previous classes
-                messageBox.classList.add('px-6', 'py-3', 'rounded-lg', 'font-semibold', 'shadow-lg', 'text-white', 'z-1000', 'fixed', 'top-1/2', 'left-1/2', 'transform', '-translate-x-1/2', '-translate-y-1/2'); // Add common classes
-
-                if (type === 'error') {
-                    messageBox.classList.add('bg-red-600');
-                } else {
-                    messageBox.classList.add('bg-green-600');
-                }
-                messageBox.style.display = 'block';
-
-                // Hide the message after 3 seconds
-                setTimeout(() => {
-                    messageBox.style.display = 'none';
-                }, 3000);
-            }
-        
-            /**
-             * Creates and downloads a CSV file with the reference number.
-             * @param {string} refNo - The reference number.
-             */
-            function downloadCsv(refNo) {
-                const csvContent = "ReferenceNumber\n" + refNo;
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-
-                link.setAttribute("href", url);
-                link.setAttribute("download", `Adverity_Ref_${refNo}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            /**
-             * Handles sending the email based on the action (Approve/Reject).
-             * @param {string} actionType - 'Approve' or 'Reject'.
-             * @param {string} recipient - The email address of the recipient.
-             */
-            function sendEmail(actionType, recipient) {
-                const refNo = referenceNoInput.value.trim();
-
-                if (!refNo) {
-                    showMessageBox('Please enter a reference number.', 'error');
-                    return;
-                }
-                
-                // Download the CSV file
-                downloadCsv(refNo);
-                
-                // Create the email body with bolding using asterisks
-                const body = encodeURIComponent(
-                    `**PLEASE ATTACH THE FILE: Adverity_Ref_${refNo}.csv**\n` +
-                    `*THIS FILE CAN BE FOUND IN YOUR DOWNLOADS FOLDER.*\n\n` +
-                    `Action: ${actionType}\n\n` +
-                    `Adverity Reference Number: ${refNo}\n` +
-                );
-
-                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(`${actionType} Adverity Reference Number: ${refNo}`)}&body=${body}`;
-
-                try {
-                    // Open the email client
-                    window.location.href = mailtoLink;
-                    showMessageBox(`CSV downloaded and email client opened for ${actionType} action!`, 'success');
-                } catch (error) {
-                    showMessageBox('Could not open email client. Please open Outlook.', 'error');
-                    console.error('Error opening mailto link:', error);
-                }
-            }
-        
-            // Event listeners for the buttons
-            approveBtn.addEventListener('click', () => {
-                sendEmail('Approve', approveRecipient);
-            });
-            rejectBtn.addEventListener('click', () => {
-                sendEmail('Reject', rejectRecipient);
-            });
-        });
-    </script>
+            // Open the email client with a delay to ensure the file download starts first
+            setTimeout(() => {
+                window.location.href = `mailto:${emailTo}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            }, 500);
+        }
+    </script>
 </body>
 </html>
-
