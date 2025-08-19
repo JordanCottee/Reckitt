@@ -37,16 +37,16 @@
     <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md text-center">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Enter Adverity Reference Number</h1>
 
-        <p class="text-gray-600 mb-8">This can be copied and pasted from the table above.</p>
+        <p class="text-gray-600 mb-8">This number can be copied and pasted from the table above.</p>
 
         <div class="mb-6">
             <label for="referenceNo" class="block text-gray-700 text-left text-sm font-medium mb-2">Reference Number:</label>
             <input
                 type="text"
                 id="referenceNo"
-                placeholder="e.g., ABC-12345"
+                placeholder="e.g. 9ed820e9-ed7d-4003-b8d8-0b179b34b11f"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800"
-                aria-label="Reference Number Input"
+                aria-label="Adverity File Reference Number Input"
             >
         </div>
 
@@ -143,19 +143,17 @@
                     `**PLEASE ATTACH THE FILE: Adverity_Ref_${refNo}.csv**\n` +
                     `*THIS FILE CAN BE FOUND IN YOUR DOWNLOADS FOLDER.*\n\n` +
                     `Action: ${actionType}\n\n` +
-                    `Reference Number below in CSV format:\n\n` +
-                    `ReferenceNumber\n` +
-                    `${refNo}`
+                    `Adverity Reference Number: ${refNo}\n` +
                 );
 
-                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(`${actionType} Reference Number: ${refNo}`)}&body=${body}`;
+                const mailtoLink = `mailto:${recipient}?subject=${encodeURIComponent(`${actionType} Adverity Reference Number: ${refNo}`)}&body=${body}`;
 
                 try {
                     // Open the email client
                     window.location.href = mailtoLink;
                     showMessageBox(`CSV downloaded and email client opened for ${actionType} action!`, 'success');
                 } catch (error) {
-                    showMessageBox('Could not open email client. Please ensure you have one configured.', 'error');
+                    showMessageBox('Could not open email client. Please open Outlook.', 'error');
                     console.error('Error opening mailto link:', error);
                 }
             }
@@ -171,3 +169,4 @@
     </script>
 </body>
 </html>
+
